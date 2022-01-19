@@ -23,6 +23,10 @@ public class SMSgpt3 {
 
         post("/sms", (req, res) -> {
             res.type("application/xml");
+            if (storyArray.size() > 0){
+                System.out.println("[INFO] : Clearing arraylist");
+                storyArray.removeAll(storyArray);
+            }
             CompletionRequest completionRequest = CompletionRequest.builder()
                     .prompt("This is a story of Boy Meets Girl, but you should know up front, this is not a Love Story.")
                     .temperature(0.7)
@@ -32,21 +36,12 @@ public class SMSgpt3 {
                     .presencePenalty(0.3)
                     .echo(true)
                     .build();
-//                service.createCompletion("davinci", completionRequest);
-
             service.createCompletion("davinci", completionRequest).getChoices().forEach(line -> {storyArray.add(line);});
             String SMSElement = storyArray.toString();
-            Integer ArrayListSize = storyArray.size();      // returns 1
-            // parse the relevant info from arraylist string
-            String prefix = "CompletionChoice(text="; // 21 char
-            String suffix = ", index=0, logprobs=null, finish_reason=length)";
-
-            String removePrefixString = SMSElement.substring(SMSElement.indexOf(prefix) + prefix.length());
-            String parsedString = removePrefixString.substring(0, removePrefixString.length() - suffix.length());
-            System.out.println(parsedString);
+            System.out.println(SMSElement);
 
             Body body = new Body
-                    .Builder(parsedString)
+                    .Builder(SMSElement)
                     .build();
             Message sms = new Message
                     .Builder()
